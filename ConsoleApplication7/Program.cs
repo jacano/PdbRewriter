@@ -10,8 +10,6 @@ namespace ConsoleApplication7
 {
     class Program
     {
-        // srctool WaveEngine.Common.pdb -x -r
-
         static void Main(string[] args)
         {
             var file = @"E:\dev\pdbrewriter\ConsoleApplication7\ConsoleApplication7.pdb";
@@ -19,6 +17,8 @@ namespace ConsoleApplication7
             using (var pdb = new PdbFile(file))
             {
                 var sourceFiles = pdb.GetFiles();
+
+                pdb.Rewrite((s) => s.Replace(@"e:\dev\", ""));
             }
         }
     }

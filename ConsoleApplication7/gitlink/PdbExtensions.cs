@@ -31,7 +31,7 @@ namespace ConsoleApplication7.gitlink
             return results;
         }
 
-        internal static void Rewrite(this PdbFile pdbFile, string rewrite)
+        internal static void Rewrite(this PdbFile pdbFile, Func<string,string> rewrite)
         {
             var fileIndicatorLenght = FileIndicator.Length;
 
@@ -46,13 +46,28 @@ namespace ConsoleApplication7.gitlink
                             continue;
                         }
 
-                        var offset = (int)value.Stream + fileIndicatorLenght;
                         var name = value.Name.Substring(fileIndicatorLenght);
+                        var nameLength = name.Length;
 
-                        var newBytes = new byte[name.Length];
+                        var rewrittenName = rewrite(name);
+                        var rewrittenNameLength = rewrittenName.Length;
 
+                        if (rewrittenNameLength > nameLength)
+                        {
+                            throw new Exception("Impossible to rewrite");
+                        }
+
+                        var rewrittenBytes = Encoding.ASCII.GetBytes(rewrittenName);
+                        var newBytesToOverride = new byte[nameLength];
+                        for (var i = 0; i < rewrittenNameLength; i++)
+                        {
+                            newBytesToOverride[i] = rewrittenBytes[i];
+                        }
+
+                        var offset = (int)value.Stream + fileIndicatorLenght;
                         bw.Seek(offset, SeekOrigin.Begin);
-                        bw.Write(newBytes);
+
+                        bw.Write(newBytesToOverride);
                     }
                 }
             }
