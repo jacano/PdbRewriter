@@ -11,11 +11,10 @@ namespace ConsoleApplication7.gitlink
 {
     internal static class PdbExtensions
     {
-        internal static List<string> GetFilesAndChecksums(this PdbFile pdbFile)
-        {
-            // const int LastInterestingByte = 47;
-            const string FileIndicator = "/src/files/";
+        const string FileIndicator = "/src/files/";
 
+        internal static List<string> GetFiles(this PdbFile pdbFile)
+        {
             var results = new List<string>();
             foreach (var value in pdbFile.Info.PdbNames)
             {
@@ -30,6 +29,33 @@ namespace ConsoleApplication7.gitlink
             }
 
             return results;
+        }
+
+        internal static void Rewrite(this PdbFile pdbFile, string rewrite)
+        {
+            var fileIndicatorLenght = FileIndicator.Length;
+
+            using (var fs = File.Open(pdbFile.Path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
+            {
+                using (var bw = new BinaryWriter(fs, Encoding.UTF8, true))
+                {
+                    foreach (var value in pdbFile.Info.PdbNames)
+                    {
+                        if (!value.Name.StartsWith(FileIndicator))
+                        {
+                            continue;
+                        }
+
+                        var offset = (int)value.Stream + fileIndicatorLenght;
+                        var name = value.Name.Substring(fileIndicatorLenght);
+
+                        var newBytes = new byte[name.Length];
+
+                        bw.Seek(offset, SeekOrigin.Begin);
+                        bw.Write(newBytes);
+                    }
+                }
+            }
         }
     }
 }

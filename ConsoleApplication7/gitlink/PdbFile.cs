@@ -16,7 +16,6 @@ namespace GitLink.Pdb
     internal class PdbFile : IDisposable
     {
         private readonly BinaryReader _br;
-        private readonly BinaryWriter _bw;
         private readonly FileStream _fs;
 
         private int _pageByteCount;
@@ -26,14 +25,17 @@ namespace GitLink.Pdb
 
         internal PdbFile(string path)
         {
+            Path = path;
+
             _fs = File.Open(path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
             _br = new BinaryReader(_fs, Encoding.UTF8, true);
-            _bw = new BinaryWriter(_fs, Encoding.UTF8, true);
 
             CheckPdbHeader();
             ReadPdbHeader();
             CheckPdb();
         }
+
+        internal string Path { get; private set; }
 
         internal int RootPage { get; private set; }
 
@@ -281,7 +283,6 @@ namespace GitLink.Pdb
         public void Dispose()
         {
             // Move to dispose
-            _bw.Close();
             _br.Close();
             _fs.Close();
         }

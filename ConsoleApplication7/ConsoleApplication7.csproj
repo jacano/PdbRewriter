@@ -50,8 +50,6 @@
     <Compile Include="gitlink\PdbName.cs" />
     <Compile Include="gitlink\PdbRoot.cs" />
     <Compile Include="gitlink\PdbStream.cs" />
-    <Compile Include="reader\Dia2Interop.cs" />
-    <Compile Include="reader\PdbReader.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

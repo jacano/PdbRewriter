@@ -14,14 +14,12 @@ namespace ConsoleApplication7
 
         static void Main(string[] args)
         {
-            var file = @"D:\dev\Engine\Deploy\NugetPackages\WaveEngine.Common.Symbols\lib\net45\WaveEngine.Common.pdb";
+            var file = @"E:\dev\pdbrewriter\ConsoleApplication7\ConsoleApplication7.pdb";
 
             using (var pdb = new PdbFile(file))
             {
-                var sourceFiles = pdb.GetFilesAndChecksums();
+                var sourceFiles = pdb.GetFiles();
             }
-
-            var t = PdbReader.ReadSourceFiles(file);
         }
     }
 }
