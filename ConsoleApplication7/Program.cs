@@ -8,11 +8,11 @@ namespace ConsoleApplication7
     {
         static unsafe void Main(string[] args)
         {
-            var fileInput = @"C:\Users\jacano\Desktop\ConsoleApp.pdb";
-            var fileOutput = @"C:\Users\jacano\Desktop\ConsoleApp1.pdb";
+            var fileInput = @"C:\Users\jacano\Desktop\GoogleAnalyticsTracker.Core.pdb";
+            var fileOutput = @"C:\Users\jacano\Desktop\GoogleAnalyticsTracker.Core1.pdb";
 
-            var searchString = @"D:\dev\";
-            var replaceString = @"%TESTVV%";
+            var searchString = @"D:\temp\e086b63\GoogleAnalyticsTracker.Core";
+            var replaceString = @"%TVV%";
 
             var searchStringLower = searchString.ToLowerInvariant();
             var replaceStringLower = replaceString.ToLowerInvariant();
