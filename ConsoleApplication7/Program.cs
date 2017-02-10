@@ -14,48 +14,61 @@ namespace ConsoleApplication7
             var fileInput = @"C:\Users\jacano\Desktop\ConsoleApp.pdb";
             var sourceFiles = PdbReader.ReadSourceFiles(fileInput);
 
-            Func<string, string> rewrite = (s) => s.Replace(@"D:\dev\", "");
+            var replaceString = @"D:\dev\";
+            var replaceStringLower = replaceString.ToLowerInvariant();
+
+            Func<string, string> rewrite = (s) => s.Replace(replaceString, "");
+            Func<string, string> rewriteLower = (s) => s.Replace(replaceStringLower, "");
 
             var bytes = File.ReadAllBytes(fileInput);
             var byteLenght = bytes.LongLength;
             fixed (byte* bytesPointer = bytes)
             {
-                foreach (var name in sourceFiles)
+                for (var i = 0; i < sourceFiles.Count; i++)
                 {
-                    var nameBytes = Encoding.ASCII.GetBytes(name);
-                    var nameBytesLength = nameBytes.LongLength;
-                    fixed (byte* nameBytesPointer = nameBytes)
-                    {
-                        var rewrittenName = rewrite(name);
+                    var name = sourceFiles[i];
+                    var lowerName = name.ToLowerInvariant();
 
-                        var rewrittenNameBytes = Encoding.ASCII.GetBytes(rewrittenName);
-                        var rewrittenNameBytesLength = rewrittenNameBytes.LongLength;
-
-                        if (rewrittenNameBytesLength > nameBytesLength)
-                        {
-                            throw new Exception("Impossible to rewrite");
-                        }
-
-                        fixed (byte* rewrittenNameBytesPointer = rewrittenNameBytes)
-                        {
-                            var offset = 0L;
-                            while (offset >= 0)
-                            {
-                                offset = IndexOf(offset, bytesPointer, byteLenght, nameBytesPointer, nameBytesLength);
-                                if (offset < 0)
-                                {
-                                    break;
-                                }
-
-                                offset += Override(offset, bytesPointer, rewrittenNameBytesPointer, rewrittenNameBytesLength, nameBytesLength);
-                            }
-                        }
-                    }
+                    RewriteSourceFiles(bytesPointer, byteLenght, name, rewrite);
+                    RewriteSourceFiles(bytesPointer, byteLenght, lowerName, rewriteLower);
                 }
             }
 
             var fileOutput = @"C:\Users\jacano\Desktop\ConsoleApp1.pdb";
             File.WriteAllBytes(fileOutput, bytes);
+        }
+
+        private static unsafe void RewriteSourceFiles(byte* bytesPointer, long byteLenght, string name, Func<string, string> rewrite)
+        {
+            var nameBytes = Encoding.ASCII.GetBytes(name);
+            var nameBytesLength = nameBytes.LongLength;
+            fixed (byte* nameBytesPointer = nameBytes)
+            {
+                var rewrittenName = rewrite(name);
+
+                var rewrittenNameBytes = Encoding.ASCII.GetBytes(rewrittenName);
+                var rewrittenNameBytesLength = rewrittenNameBytes.LongLength;
+
+                if (rewrittenNameBytesLength > nameBytesLength)
+                {
+                    throw new Exception("Impossible to rewrite");
+                }
+
+                fixed (byte* rewrittenNameBytesPointer = rewrittenNameBytes)
+                {
+                    var offset = 0L;
+                    while (offset >= 0)
+                    {
+                        offset = IndexOf(offset, bytesPointer, byteLenght, nameBytesPointer, nameBytesLength);
+                        if (offset < 0)
+                        {
+                            break;
+                        }
+
+                        offset += Override(offset, bytesPointer, rewrittenNameBytesPointer, rewrittenNameBytesLength, nameBytesLength);
+                    }
+                }
+            }
         }
 
         private static unsafe long Override(long startOffset, byte* bytesPointer, byte* rewrittenBytes, long rewrittenBytesLength, long nameBytesLength)
