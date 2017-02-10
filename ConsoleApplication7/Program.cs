@@ -1,6 +1,4 @@
-﻿using ConsoleApplication7.gitlink;
-using GitLink.Pdb;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,48 +7,98 @@ using System.Threading.Tasks;
 
 namespace ConsoleApplication7
 {
-    class Program
+    static class Program
     {
-        static void Main(string[] args)
+        static unsafe void Main(string[] args)
         {
-            var file = @"C:\Users\jacano\Desktop\ConsoleApp.pdb";
+            var fileInput = @"C:\Users\jacano\Desktop\ConsoleApp.pdb";
+            var sourceFiles = PdbReader.ReadSourceFiles(fileInput);
 
-            var sourceFiles = PdbReader.ReadSourceFiles(file);
+            Func<string, string> rewrite = (s) => s.Replace(@"D:\dev\", "");
 
-            Func<string, string> rewrite = (s) => s.Replace(@"d:\dev\", "");
-
-            using (var fs = File.Open(file, FileMode.Open))
+            var bytes = File.ReadAllBytes(fileInput);
+            var byteLenght = bytes.LongLength;
+            fixed (byte* bytesPointer = bytes)
             {
-                using (var bw = new BinaryWriter(fs))
+                foreach (var name in sourceFiles)
                 {
-                    foreach (var pdbName in sourceFiles)
+                    var nameBytes = Encoding.ASCII.GetBytes(name);
+                    var nameBytesLength = nameBytes.LongLength;
+                    fixed (byte* nameBytesPointer = nameBytes)
                     {
-                        var name = pdbName;
-                        var nameLength = name.Length;
-
                         var rewrittenName = rewrite(name);
-                        var rewrittenNameLength = rewrittenName.Length;
 
-                        if (rewrittenNameLength > nameLength)
+                        var rewrittenNameBytes = Encoding.ASCII.GetBytes(rewrittenName);
+                        var rewrittenNameBytesLength = rewrittenNameBytes.LongLength;
+
+                        if (rewrittenNameBytesLength > nameBytesLength)
                         {
                             throw new Exception("Impossible to rewrite");
                         }
 
-                        var rewrittenBytes = Encoding.ASCII.GetBytes(rewrittenName);
-                        var newBytesToOverride = new byte[nameLength];
-                        for (var i = 0; i < rewrittenNameLength; i++)
+                        fixed (byte* rewrittenNameBytesPointer = rewrittenNameBytes)
                         {
-                            newBytesToOverride[i] = rewrittenBytes[i];
+                            var offset = 0L;
+                            while (offset >= 0)
+                            {
+                                offset = IndexOf(offset, bytesPointer, byteLenght, nameBytesPointer, nameBytesLength);
+                                if (offset < 0)
+                                {
+                                    break;
+                                }
+
+                                offset += Override(offset, bytesPointer, rewrittenNameBytesPointer, rewrittenNameBytesLength, nameBytesLength);
+                            }
                         }
-
-                        bw.
-                        var offset = (int)pdbName.Stream;
-                        bw.Seek(offset, SeekOrigin.Begin);
-
-                        bw.Write(newBytesToOverride);
                     }
                 }
             }
+
+            var fileOutput = @"C:\Users\jacano\Desktop\ConsoleApp1.pdb";
+            File.WriteAllBytes(fileOutput, bytes);
+        }
+
+        private static unsafe long Override(long startOffset, byte* bytesPointer, byte* rewrittenBytes, long rewrittenBytesLength, long nameBytesLength)
+        {
+            var rInc = rewrittenBytes;
+            var bInc = bytesPointer + startOffset;
+
+            var rEnd = bInc + rewrittenBytesLength;
+            var nEnd = bInc + nameBytesLength;
+
+            for (; bInc < rEnd; bInc++, rInc++)
+            {
+                *bInc = *rInc;
+            }
+
+            for (; bInc < nEnd; bInc++)
+            {
+                *bInc = 0;
+            }
+
+            return nameBytesLength;
+        }
+
+        private static unsafe long IndexOf(long startOffset, byte* haystack, long haystackLength, byte* needle, long needleLength)
+        {
+            var hNext = haystack + startOffset;
+            var hEnd = haystack + haystackLength + 1 - needleLength;
+            var nEnd = needle + needleLength;
+
+            for (; hNext < hEnd; hNext++)
+            {
+                var hInc = hNext;
+                var nInc = needle;
+                for (; *nInc == *hInc; hInc++)
+                {
+                    if (++nInc == nEnd)
+                    {
+                        return hNext - haystack;
+                    }
+                }
+            }
+
+            return -1;
         }
     }
 }
