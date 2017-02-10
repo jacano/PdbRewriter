@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ConsoleApplication7
 {
@@ -12,13 +9,18 @@ namespace ConsoleApplication7
         static unsafe void Main(string[] args)
         {
             var fileInput = @"C:\Users\jacano\Desktop\ConsoleApp.pdb";
-            var sourceFiles = PdbReader.ReadSourceFiles(fileInput);
+            var fileOutput = @"C:\Users\jacano\Desktop\ConsoleApp1.pdb";
 
-            var replaceString = @"D:\dev\";
+            var searchString = @"D:\dev\";
+            var replaceString = @"%TESTVV%";
+
+            var searchStringLower = searchString.ToLowerInvariant();
             var replaceStringLower = replaceString.ToLowerInvariant();
 
-            Func<string, string> rewrite = (s) => s.Replace(replaceString, "");
-            Func<string, string> rewriteLower = (s) => s.Replace(replaceStringLower, "");
+            Func<string, string> rewrite = (s) => s.Replace(searchString, replaceString);
+            Func<string, string> rewriteLower = (s) => s.Replace(searchStringLower, replaceStringLower);
+
+            var sourceFiles = PdbReader.ReadSourceFiles(fileInput);
 
             var bytes = File.ReadAllBytes(fileInput);
             var byteLenght = bytes.LongLength;
@@ -34,7 +36,6 @@ namespace ConsoleApplication7
                 }
             }
 
-            var fileOutput = @"C:\Users\jacano\Desktop\ConsoleApp1.pdb";
             File.WriteAllBytes(fileOutput, bytes);
         }
 
@@ -42,18 +43,19 @@ namespace ConsoleApplication7
         {
             var nameBytes = Encoding.ASCII.GetBytes(name);
             var nameBytesLength = nameBytes.LongLength;
+
+            var rewrittenName = rewrite(name);
+
+            var rewrittenNameBytes = Encoding.ASCII.GetBytes(rewrittenName);
+            var rewrittenNameBytesLength = rewrittenNameBytes.LongLength;
+
+            if (rewrittenNameBytesLength > nameBytesLength)
+            {
+                throw new Exception("Impossible to rewrite");
+            }
+
             fixed (byte* nameBytesPointer = nameBytes)
             {
-                var rewrittenName = rewrite(name);
-
-                var rewrittenNameBytes = Encoding.ASCII.GetBytes(rewrittenName);
-                var rewrittenNameBytesLength = rewrittenNameBytes.LongLength;
-
-                if (rewrittenNameBytesLength > nameBytesLength)
-                {
-                    throw new Exception("Impossible to rewrite");
-                }
-
                 fixed (byte* rewrittenNameBytesPointer = rewrittenNameBytes)
                 {
                     var offset = 0L;
@@ -69,27 +71,6 @@ namespace ConsoleApplication7
                     }
                 }
             }
-        }
-
-        private static unsafe long Override(long startOffset, byte* bytesPointer, byte* rewrittenBytes, long rewrittenBytesLength, long nameBytesLength)
-        {
-            var rInc = rewrittenBytes;
-            var bInc = bytesPointer + startOffset;
-
-            var rEnd = bInc + rewrittenBytesLength;
-            var nEnd = bInc + nameBytesLength;
-
-            for (; bInc < rEnd; bInc++, rInc++)
-            {
-                *bInc = *rInc;
-            }
-
-            for (; bInc < nEnd; bInc++)
-            {
-                *bInc = 0;
-            }
-
-            return nameBytesLength;
         }
 
         private static unsafe long IndexOf(long startOffset, byte* haystack, long haystackLength, byte* needle, long needleLength)
@@ -112,6 +93,27 @@ namespace ConsoleApplication7
             }
 
             return -1;
+        }
+
+        private static unsafe long Override(long startOffset, byte* bytesPointer, byte* rewrittenBytes, long rewrittenBytesLength, long nameBytesLength)
+        {
+            var rInc = rewrittenBytes;
+            var bInc = bytesPointer + startOffset;
+
+            var rEnd = bInc + rewrittenBytesLength;
+            var nEnd = bInc + nameBytesLength;
+
+            for (; bInc < rEnd; bInc++, rInc++)
+            {
+                *bInc = *rInc;
+            }
+
+            for (; bInc < nEnd; bInc++)
+            {
+                *bInc = 0;
+            }
+
+            return nameBytesLength;
         }
     }
 }
