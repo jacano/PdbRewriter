@@ -13,20 +13,19 @@ namespace ConsoleApplication7
     {
         static void Main(string[] args)
         {
-            Func<string, string> rewrite = (s) => s.Replace(@"d:\dev\", "");
-
             var file = @"C:\Users\jacano\Desktop\ConsoleApp.pdb";
 
-            var pdb = new PdbFile(file);
-            var pdbInfo = pdb.Deserialize();
+            var sourceFiles = PdbReader.ReadSourceFiles(file);
+
+            Func<string, string> rewrite = (s) => s.Replace(@"d:\dev\", "");
 
             using (var fs = File.Open(file, FileMode.Open))
             {
                 using (var bw = new BinaryWriter(fs))
                 {
-                    foreach (var pdbName in pdbInfo.PdbNames)
+                    foreach (var pdbName in sourceFiles)
                     {
-                        var name = pdbName.Name;
+                        var name = pdbName;
                         var nameLength = name.Length;
 
                         var rewrittenName = rewrite(name);
@@ -44,6 +43,7 @@ namespace ConsoleApplication7
                             newBytesToOverride[i] = rewrittenBytes[i];
                         }
 
+                        bw.
                         var offset = (int)pdbName.Stream;
                         bw.Seek(offset, SeekOrigin.Begin);
 

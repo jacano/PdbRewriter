@@ -31,7 +31,7 @@
                     ReadPdbHeader(br);
                     CheckPdb(fs);
 
-                    _root = ReadRoot(br);
+                    _root = ReadRoot(fs, br);
                 }
             }
         }
@@ -44,14 +44,14 @@
             {
                 using (var br = new BinaryReader(fs))
                 {
-                    return InternalInfo(br);
+                    return InternalInfo(fs, br);
                 }
             }
         }
 
         private void CheckPdbHeader(BinaryReader br)
         {
-            var msf = String.Format("Microsoft C/C++ MSF 7.00\r\n{0}DS\0\0\0", (char)0x1A);
+            var msf = string.Format("Microsoft C/C++ MSF 7.00\r\n{0}DS\0\0\0", (char)0x1A);
             var bytes = Encoding.ASCII.GetBytes(msf);
             if (!bytes.SequenceEqual(br.ReadBytes(32)))
             {
@@ -68,7 +68,7 @@
             _pagesFree = br.ReadInt32(); // 0x24 TODO not sure meaning
             _pageCount = br.ReadInt32(); // 0x28 for file
             _rootByteCount = br.ReadInt32(); // 0x2C
-            br.BaseStream.Position += 4; // 0
+            var dummy = br.ReadInt32();  // 0
             _rootPage = br.ReadInt32(); // 0x34
         }
 
@@ -94,11 +94,11 @@
             }
         }
 
-        private PdbRoot ReadRoot(BinaryReader br)
+        private PdbRoot ReadRoot(FileStream fs, BinaryReader br)
         {
-            var pdbStreamRoot = GetRootPdbStream(br);
+            var pdbStreamRoot = GetRootPdbStream(fs, br);
             var root = new PdbRoot(pdbStreamRoot);
-            using (var ms = new MemoryStream(ReadStreamBytes(br, pdbStreamRoot)))
+            using (var ms = new MemoryStream(ReadStreamBytes(fs, br, pdbStreamRoot)))
             {
                 using (var brDirectory = new BinaryReader(ms))
                 {
@@ -133,13 +133,13 @@
             return root;
         }
 
-        private PdbStream GetRootPdbStream(BinaryReader br)
+        private PdbStream GetRootPdbStream(FileStream fs, BinaryReader br)
         {
             var pdbStream = new PdbStream();
             pdbStream.ByteCount = _rootByteCount;
             pdbStream.Pages = new int[CountPages(_rootByteCount)];
 
-            GoToPage(br, _rootPage);
+            GoToPage(fs, br, _rootPage);
 
             for (var i = 0; i < pdbStream.Pages.Length; i++)
             {
@@ -154,14 +154,15 @@
             return (byteCount + _pageByteCount - 1) / _pageByteCount;
         }
 
-        private void GoToPage(BinaryReader br, int page)
+        private void GoToPage(FileStream fs, BinaryReader br, int page)
         {
-            br.BaseStream.Position = page * _pageByteCount;
+            var numBytes = page * _pageByteCount;
+            fs.Seek(numBytes, SeekOrigin.Begin);
         }
 
-        private void ReadPage(BinaryReader br, byte[] bytes, int page, int offset, int count)
+        private void ReadPage(FileStream fs, BinaryReader br, byte[] bytes, int page, int offset, int count)
         {
-            GoToPage(br, page);
+            GoToPage(fs, br, page);
 
             var read = br.Read(bytes, offset, count);
             if (read != count)
@@ -170,7 +171,7 @@
             }
         }
 
-        private byte[] ReadStreamBytes(BinaryReader br, PdbStream stream)
+        private byte[] ReadStreamBytes(FileStream fs, BinaryReader br, PdbStream stream)
         {
             var bytes = new byte[stream.ByteCount];
             var pages = stream.Pages;
@@ -179,17 +180,17 @@
             {
                 for (var i = 0; i < pages.Length - 1; i++)
                 {
-                    ReadPage(br, bytes, pages[i], i * _pageByteCount, _pageByteCount);
+                    ReadPage(fs, br, bytes, pages[i], i * _pageByteCount, _pageByteCount);
                 }
 
                 var j = pages.Length - 1;
-                ReadPage(br, bytes, pages[j], j * _pageByteCount, stream.ByteCount - (j * _pageByteCount));
+                ReadPage(fs, br, bytes, pages[j], j * _pageByteCount, stream.ByteCount - (j * _pageByteCount));
             }
 
             return bytes;
         }
 
-        private PdbInfo InternalInfo(BinaryReader br)
+        private PdbInfo InternalInfo(FileStream fs, BinaryReader br)
         {
             var info = new PdbInfo();
 
@@ -200,7 +201,7 @@
                     _root.Streams.Count));
             }
 
-            using (var ms = new MemoryStream(ReadStreamBytes(br, _root.Streams[1])))
+            using (var ms = new MemoryStream(ReadStreamBytes(fs, br, _root.Streams[1])))
             {
                 using (var brData = new BinaryReader(ms))
                 {
@@ -210,8 +211,10 @@
                     info.Guid = new Guid(brData.ReadBytes(16)); // 0x0C
 
                     var namesByteCount = brData.ReadInt32(); // 0x16
-                    var namesByteStart = brData.BaseStream.Position; // 0x20
-                    brData.BaseStream.Position = namesByteStart + namesByteCount;
+                    var namesByteStart = ms.Position; // 0x20
+
+                    var offset = namesByteStart + namesByteCount;
+                    ms.Seek(offset, SeekOrigin.Begin);
 
                     var nameCount = brData.ReadInt32();
                     info.FlagIndexMax = brData.ReadInt32();
@@ -223,7 +226,8 @@
                         flags[i] = brData.ReadInt32();
                     }
 
-                    brData.BaseStream.Position += 4; // 0
+                    var dummy = brData.ReadInt32(); // 0
+
                     var positions = new List<int>(nameCount);
                     for (var i = 0; i < info.FlagIndexMax; i++)
                     {
@@ -250,8 +254,10 @@
                     foreach (var index in positions)
                     {
                         var position = namesByteStart + index;
-                        brData.BaseStream.Position = position;
 
+                        ms.Seek(position, SeekOrigin.Begin);
+
+                        var globalPosition = fs.Position;
                         var name = brData.ReadCString();
 
                         if (name.StartsWith(FileIndicator))
@@ -260,7 +266,7 @@
 
                             var pdbName = new PdbName();
                             pdbName.Name = nameFinal;
-                            pdbName.Stream = position;
+                            pdbName.Stream = globalPosition;
 
                             info.AddName(pdbName);
                         }
