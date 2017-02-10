@@ -1,20 +1,14 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="PdbName.cs" company="CatenaLogic">
-//   Copyright (c) 2014 - 2016 CatenaLogic. All rights reserved.
-// </copyright>
-// --------------------------------------------------------------------------------------------------------------------
-
-namespace GitLink.Pdb
+﻿namespace GitLink.Pdb
 {
-    internal class PdbName
+    public class PdbName
     {
-        internal PdbName(string name = "")
+        public PdbName(string name = "")
         {
             Name = name;
         }
 
-        internal long Stream { get; set; }
+        public string Name { get; set; }
 
-        internal string Name { get; set; }
+        public long Stream { get;  set; }
     }
 }

@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace ConsoleApplication7.gitlink
 {
-    internal static class BinaryReaderExtensions
+    public static class BinaryReaderExtensions
     {
-        internal static string ReadCString(this BinaryReader binaryReader)
+        public static string ReadCString(this BinaryReader binaryReader)
         {
             var list = new List<byte>();
 
@@ -20,7 +20,7 @@ namespace ConsoleApplication7.gitlink
                 b = binaryReader.ReadByte();
             }
 
-            return Encoding.UTF8.GetString(list.ToArray());
+            return Encoding.ASCII.GetString(list.ToArray());
         }
     }
 }

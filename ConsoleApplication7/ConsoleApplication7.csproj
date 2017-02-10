@@ -44,7 +44,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="gitlink\BinaryReaderExtensions.cs" />
-    <Compile Include="gitlink\PdbExtensions.cs" />
     <Compile Include="gitlink\PdbFile.cs" />
     <Compile Include="gitlink\PdbInfo.cs" />
     <Compile Include="gitlink\PdbName.cs" />
