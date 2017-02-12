@@ -1,4 +1,9 @@
-﻿using System;
+﻿using Mono.Cecil;
+using Mono.Cecil.Cil;
+using Mono.Cecil.Mdb;
+using Mono.Cecil.Pdb;
+using Mono.Collections.Generic;
+using System;
 using System.IO;
 using System.Text;
 
@@ -6,7 +11,82 @@ namespace ConsoleApplication7
 {
     static class Program
     {
-        static unsafe void Main(string[] args)
+        static void Main(string[] args)
+        {
+            var fileInput = @"C:\Users\jacano\Desktop\GoogleAnalyticsTracker.Core.dll";
+            var pdbInput = @"C:\Users\jacano\Desktop\GoogleAnalyticsTracker.Core.pdb";
+
+            var fileOutput = @"C:\Users\jacano\Desktop\GoogleAnalyticsTracker.Core1.dll";
+            var pdbOutput = @"C:\Users\jacano\Desktop\GoogleAnalyticsTracker.Core1.pdb";
+
+            var searchString = @"D:\temp\e086b63\GoogleAnalyticsTracker.Core";
+            var replaceString = @"test";
+
+            Func<string, string> rewrite = (s) => s.Replace(searchString, replaceString);
+
+            var pdbStream = new FileStream(pdbInput, FileMode.Open);
+            //var pdbOutStream = new FileStream(pdbOutput, FileMode.OpenOrCreate);
+
+            using (var fileStream = new FileStream(fileInput, FileMode.Open))
+            {
+                using (var assembly = AssemblyDefinition.ReadAssembly(fileStream, 
+                    new ReaderParameters()
+                    {
+                        SymbolReaderProvider = new PdbReaderProvider(),
+                        SymbolStream = pdbStream,
+                        ReadSymbols = true,
+                    }
+                ))
+                {
+                    /*var md = assembly.MainModule;
+                    var nativePdbReader = new NativePdbReaderProvider().GetSymbolReader(md, fileInput);
+
+                    byte[] header;
+                    var directory = md.GetDebugHeader(out header);
+                    nativePdbReader.ProcessDebugHeader(directory, header);*/
+
+                    //ReadTypesSymbols(md.Types, nativePdbReader);
+
+                    assembly.Write(fileOutput, new WriterParameters()
+                    {
+                        SymbolWriterProvider = new PdbWriterProvider(),
+                        WriteSymbols = true,
+                    });
+                }
+            }
+        }
+
+        static void ReadTypesSymbols(Collection<TypeDefinition> types, ISymbolReader symbol_reader)
+        {
+            for (int i = 0; i < types.Count; i++)
+            {
+                var type = types[i];
+
+                if (type.HasNestedTypes)
+                    ReadTypesSymbols(type.NestedTypes, symbol_reader);
+
+                if (type.HasMethods)
+                    ReadMethodsSymbols(type, symbol_reader);
+            }
+        }
+
+        static void ReadMethodsSymbols(TypeDefinition type, ISymbolReader symbol_reader)
+        {
+            var methods = type.Methods;
+            for (int i = 0; i < methods.Count; i++)
+            {
+                var method = methods[i];
+                if (method.HasBody)
+                {
+                    var di = symbol_reader.Read(method);
+                    if(di != null)
+                    {
+                    }
+                }
+            }
+        }
+
+        /*static unsafe void Main(string[] args)
         {
             var fileInput = @"C:\Users\jacano\Desktop\GoogleAnalyticsTracker.Core.pdb";
             var fileOutput = @"C:\Users\jacano\Desktop\GoogleAnalyticsTracker.Core1.pdb";
@@ -114,6 +194,6 @@ namespace ConsoleApplication7
             }
 
             return nameBytesLength;
-        }
+        }*/
     }
 }
