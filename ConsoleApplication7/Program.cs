@@ -33,6 +33,7 @@ namespace ConsoleApplication7
                         assembly.Write(fileOutput, new WriterParameters()
                         {
                             SymbolWriterProvider = new PdbWriterProvider(),
+                            SourcePathRewriter = rewrite,
                             WriteSymbols = true,
                         });
                     }
