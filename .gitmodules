@@ -1,0 +1,3 @@
+[submodule "mono.cecil"]
+	path = mono.cecil
+	url = ../cecil.git
