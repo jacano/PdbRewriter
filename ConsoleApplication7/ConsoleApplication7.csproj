@@ -52,11 +52,11 @@
     <Compile Include="PdbReader\PdbReader.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\cecil\Mono.Cecil.csproj">
+    <ProjectReference Include="..\mono.cecil\Mono.Cecil.csproj">
       <Project>{d68133bd-1e63-496e-9ede-4fbdbf77b486}</Project>
       <Name>Mono.Cecil</Name>
     </ProjectReference>
-    <ProjectReference Include="..\cecil\symbols\pdb\Mono.Cecil.Pdb.csproj">
+    <ProjectReference Include="..\mono.cecil\symbols\pdb\Mono.Cecil.Pdb.csproj">
       <Project>{63e6915c-7ea4-4d76-ab28-0d7191eea626}</Project>
       <Name>Mono.Cecil.Pdb</Name>
     </ProjectReference>
