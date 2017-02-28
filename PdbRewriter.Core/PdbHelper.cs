@@ -1,11 +1,7 @@
 ﻿using Mono.Cecil;
 using Mono.Cecil.Pdb;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PdbRewriter.Core
 {
@@ -21,8 +17,15 @@ namespace PdbRewriter.Core
 
             var id = string.Empty;
 
-            Action<Guid> guid = (u) => id = u.ToString();
-            Func<string, string> rewrite = (s) => s.Replace(searchString, replaceString);
+            Action<Guid> guid = (u) =>
+            {
+                id = u.ToString("N").ToUpperInvariant();
+            };
+
+            Func<string, string> rewrite = (s) =>
+            {
+                return s.Replace(searchString, replaceString);
+            };
 
             using (var fileStream = new FileStream(fileInput, FileMode.Open))
             {
