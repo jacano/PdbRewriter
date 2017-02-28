@@ -1,0 +1,71 @@
+Crear PdbRewritter nuget (development dependency) (Un target + dll de targets para depuracion en VS + dll con codigo del core)
+	-target hookeado al BeforeTargets de ResolveAssemblyReferences
+	-Busco todos los paquetes nuget
+	-Saco la ruta inicial del nuget
+	-Por cada pdb
+		-miro si tienen carpeta src en la ruta inicial
+		-ejecuto el rewrite del pdb
+		-copio el pdb editado a la carpeta de símbolos (solo es util para UWP) usando SymbolCacheDir, falta sacar el UUID del pdb
+		
+	
+	
+	
+	
+Revisar si JustMyCode y UseDocumentChecksum están a 0 (SymbolPathState????)
+	
+	
+Windows Registry Editor Version 5.00
+
+[HKEY_CURRENT_USER\Software\Microsoft\VisualStudio\10.0\Debugger]
+"JustMyCode"=dword:00000000
+"UseSourceServer"=dword:00000001
+"UseDocumentChecksum"=dword:00000001
+"FrameworkSourceServerName"="http://referencesource.microsoft.com/symbols"
+"PublicSymbolServerName"=""
+"PublicSymbolServerName2"=""
+"SymbolPath"="http://beta.unpluggedhq.com/symbols"
+"SymbolPathState"="1"
+"SymbolCacheDir"="c:\symbols"
+
+[HKEY_CURRENT_USER\Software\Microsoft\VisualStudio\11.0\Debugger]
+"JustMyCode"=dword:00000000
+"UseSourceServer"=dword:00000001
+"UseDocumentChecksum"=dword:00000001
+"FrameworkSourceServerName"="http://referencesource.microsoft.com/symbols"
+"PublicSymbolServerName"=""
+"PublicSymbolServerName2"=""
+"SymbolPath"="http://beta.unpluggedhq.com/symbols"
+"SymbolPathState"="1"
+"SymbolCacheDir"="c:\symbols"
+
+[HKEY_CURRENT_USER\Software\Microsoft\VisualStudio\12.0\Debugger]
+"JustMyCode"=dword:00000000
+"UseSourceServer"=dword:00000001
+"UseDocumentChecksum"=dword:00000001
+"FrameworkSourceServerName"="http://referencesource.microsoft.com/symbols"
+"PublicSymbolServerName"=""
+"PublicSymbolServerName2"=""
+"SymbolPath"="http://beta.unpluggedhq.com/symbols"
+"SymbolPathState"="1"
+"SymbolCacheDir"="c:\symbols"
+
+[HKEY_CURRENT_USER\Software\Microsoft\VisualStudio\14.0\Debugger]
+"JustMyCode"=dword:00000000
+"UseSourceServer"=dword:00000001
+"UseDocumentChecksum"=dword:00000001
+"FrameworkSourceServerName"="http://referencesource.microsoft.com/symbols"
+"PublicSymbolServerName"=""
+"PublicSymbolServerName2"=""
+"SymbolPath"="http://beta.unpluggedhq.com/symbols"
+"SymbolPathState"="1"
+"SymbolCacheDir"="c:\symbols"
+
+
+
+
+Idea para no modificar en el directorio nuget 
+
+AfterTargets
+_CopyFilesMarkedCopyLocal
+
+FileWritesShareable
