@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26127.0
+VisualStudioVersion = 15.0.26206.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApplication7", "ConsoleApplication7\ConsoleApplication7.csproj", "{2061652D-025E-40E2-A6CE-080B60E3CF37}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mono.Cecil", "mono.cecil\Mono.Cecil.csproj", "{D68133BD-1E63-496E-9EDE-4FBDBF77B486}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mono.Cecil.Pdb", "mono.cecil\symbols\pdb\Mono.Cecil.Pdb.csproj", "{63E6915C-7EA4-4D76-AB28-0D7191EEA626}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PdbRewriter.Core", "PdbRewriter.Core\PdbRewriter.Core.csproj", "{9615FC42-AB6B-4B5B-AE74-EE985D5081B6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -69,6 +71,22 @@ Global
 		{63E6915C-7EA4-4D76-AB28-0D7191EEA626}.pcl_Release|Any CPU.Build.0 = pcl_Release|Any CPU
 		{63E6915C-7EA4-4D76-AB28-0D7191EEA626}.Release|Any CPU.ActiveCfg = net_4_0_Release|Any CPU
 		{63E6915C-7EA4-4D76-AB28-0D7191EEA626}.Release|Any CPU.Build.0 = net_4_0_Release|Any CPU
+		{9615FC42-AB6B-4B5B-AE74-EE985D5081B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9615FC42-AB6B-4B5B-AE74-EE985D5081B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9615FC42-AB6B-4B5B-AE74-EE985D5081B6}.net_3_5_Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9615FC42-AB6B-4B5B-AE74-EE985D5081B6}.net_3_5_Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9615FC42-AB6B-4B5B-AE74-EE985D5081B6}.net_3_5_Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9615FC42-AB6B-4B5B-AE74-EE985D5081B6}.net_3_5_Release|Any CPU.Build.0 = Release|Any CPU
+		{9615FC42-AB6B-4B5B-AE74-EE985D5081B6}.net_4_0_Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9615FC42-AB6B-4B5B-AE74-EE985D5081B6}.net_4_0_Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9615FC42-AB6B-4B5B-AE74-EE985D5081B6}.net_4_0_Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9615FC42-AB6B-4B5B-AE74-EE985D5081B6}.net_4_0_Release|Any CPU.Build.0 = Release|Any CPU
+		{9615FC42-AB6B-4B5B-AE74-EE985D5081B6}.pcl_Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9615FC42-AB6B-4B5B-AE74-EE985D5081B6}.pcl_Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9615FC42-AB6B-4B5B-AE74-EE985D5081B6}.pcl_Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9615FC42-AB6B-4B5B-AE74-EE985D5081B6}.pcl_Release|Any CPU.Build.0 = Release|Any CPU
+		{9615FC42-AB6B-4B5B-AE74-EE985D5081B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9615FC42-AB6B-4B5B-AE74-EE985D5081B6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

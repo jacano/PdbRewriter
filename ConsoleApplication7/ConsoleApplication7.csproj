@@ -52,13 +52,9 @@
     <Compile Include="PdbReader\PdbReader.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\mono.cecil\Mono.Cecil.csproj">
-      <Project>{d68133bd-1e63-496e-9ede-4fbdbf77b486}</Project>
-      <Name>Mono.Cecil</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\mono.cecil\symbols\pdb\Mono.Cecil.Pdb.csproj">
-      <Project>{63e6915c-7ea4-4d76-ab28-0d7191eea626}</Project>
-      <Name>Mono.Cecil.Pdb</Name>
+    <ProjectReference Include="..\PdbRewriter.Core\PdbRewriter.Core.csproj">
+      <Project>{9615fc42-ab6b-4b5b-ae74-ee985d5081b6}</Project>
+      <Name>PdbRewriter.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
