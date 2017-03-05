@@ -1,4 +1,5 @@
-﻿using Mono.Cecil;
+﻿using Microsoft.Win32;
+using Mono.Cecil;
 using Mono.Cecil.Pdb;
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ namespace PdbRewriter.Core
 {
     public static class PdbHelper
     {
-        public static void RewritePdb(string dllPath, string srcPath, out string guid)
+        public static void RewritePdb(string dllPath, string srcPath)
         {
             var currentGuid = string.Empty;
             Action<Guid> guidAction = (u) =>
@@ -40,18 +41,10 @@ namespace PdbRewriter.Core
             };
 
             var pdbPath = Path.ChangeExtension(dllPath, "pdb");
-            var pdbBackupPath = Path.ChangeExtension(dllPath, "pdb.bak");
-            var dllBackupPath = Path.ChangeExtension(dllPath, "dll.bak");
 
-            File.Copy(dllPath, dllBackupPath, true);
-            File.Copy(pdbPath, pdbBackupPath, true);
-
-            File.Delete(dllPath);
-            File.Delete(pdbPath);
-
-            using (var fileStream = new FileStream(dllBackupPath, FileMode.Open))
+            using (var fileStream = new FileStream(dllPath, FileMode.Open))
             {
-                using (var pdbStream = new FileStream(pdbBackupPath, FileMode.Open))
+                using (var pdbStream = new FileStream(pdbPath, FileMode.Open))
                 {
                     using (var assembly = AssemblyDefinition.ReadAssembly(fileStream,
                         new ReaderParameters()
@@ -63,6 +56,14 @@ namespace PdbRewriter.Core
                         }
                     ))
                     {
+
+                        var pdbBackupPath = Path.ChangeExtension(dllPath, "pdb.bak");
+                        File.Copy(pdbPath, pdbBackupPath, true);
+
+                        File.Delete(pdbPath);
+
+
+
                         assembly.Write(dllPath, new WriterParameters()
                         {
                             SymbolWriterProvider = new PdbWriterProvider(),
@@ -73,7 +74,50 @@ namespace PdbRewriter.Core
                 }
             }
 
-            guid = currentGuid;
+            CopyPdbToSymbolCache(pdbPath, currentGuid);
+        }
+
+        static void CopyPdbToSymbolCache(string pdbPath, string currentGuid)
+        {
+            var symbolCacheDir = GetSymbolCacheDir();
+            if(!string.IsNullOrEmpty(symbolCacheDir))
+            {
+                var pdbFilename = Path.GetFileName(pdbPath);
+                var pdbFolder = Path.Combine(symbolCacheDir, pdbFilename);
+                if (!Directory.Exists(pdbFolder))
+                {
+                    Directory.CreateDirectory(pdbFolder);
+                }
+
+                var pdbFolderGuid = Path.Combine(pdbFolder, currentGuid);
+                if (!Directory.Exists(pdbFolderGuid))
+                {
+                    Directory.CreateDirectory(pdbFolderGuid);
+                }
+
+                var finalPdbPath = Path.Combine(pdbFolderGuid, pdbFilename);
+                File.Copy(pdbPath, finalPdbPath, true);
+            }
+        }
+
+        private static string GetSymbolCacheDir()
+        {
+            var version = "14.0";
+            using (var key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\VisualStudio\" + version + @"\Debugger"))
+            {
+                if (key != null)
+                {
+                    var o = key.GetValue("SymbolCacheDir");
+                    if (o != null)
+                    {
+                        var symbolCacheDir = o as string;
+
+                        return symbolCacheDir;
+                    }
+                }
+            }
+
+            return string.Empty;
         }
 
         static int Process(List<string> srcFiles, string pdbFile)
