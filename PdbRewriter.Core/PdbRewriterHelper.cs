@@ -8,22 +8,32 @@ namespace PdbRewriter.Core
 {
     public static class PdbRewriterHelper
     {
+        private const string nugetLib = "lib";
+        private const string nugetSrc = "src";
+
         public static void TryRewrite(string dllPath)
         {
-            var nugetLib = "lib";
-            var nugetSrc = "src";
+            var path = dllPath;
 
-            var t = -1;
+            var indexOfDirSep = -1;
             do
             {
-                dllPath = dllPath.TrimEnd(Path.DirectorySeparatorChar);
+                path = path.TrimEnd(Path.DirectorySeparatorChar);
 
-                t = dllPath.LastIndexOf(Path.DirectorySeparatorChar);
-                var tt = dllPath.Substring(0, 0);
+                indexOfDirSep = path.LastIndexOf(Path.DirectorySeparatorChar);
+
+                var folderName = path.Substring(indexOfDirSep + 1);
+
+                path = path.Substring(0, indexOfDirSep);
+
+                if(folderName == nugetLib)
+                {
+                    break;
+                }
             }
-            while (t != -1);
-            var libIndex = dllPath.LastIndexOf(nugetLib);
-            var srcPath = Path.Combine(dllPath.Substring(0, libIndex), nugetSrc);
+            while (indexOfDirSep != -1);
+
+            var srcPath = Path.Combine(path, nugetSrc);
 
             var srcDirExists = Directory.Exists(srcPath);
             if (srcDirExists)

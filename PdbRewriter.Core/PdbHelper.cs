@@ -31,7 +31,7 @@ namespace PdbRewriter.Core
             {
                 var lowerPdbFile = s.ToLowerInvariant();
 
-                var index = Process(loweredFilesInSrc, lowerPdbFile);
+                var index = FindBestMatchIndex(loweredFilesInSrc, lowerPdbFile);
                 var invalidIndex = index == 0 || index == lowerPdbFile.Length - 1;
                 if (!invalidIndex)
                 {
@@ -157,7 +157,7 @@ namespace PdbRewriter.Core
             }
         }
 
-        static int Process(List<string> srcFiles, string pdbFile)
+        static int FindBestMatchIndex(List<string> srcFiles, string pdbFile)
         {
             var bestIndex = pdbFile.Length - 1;
             foreach (var file in srcFiles)
