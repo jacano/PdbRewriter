@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArrayHelper.cs" />
+    <Compile Include="ILogger.cs" />
     <Compile Include="PdbHelper.cs" />
     <Compile Include="PdbRewriterHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

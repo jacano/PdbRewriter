@@ -8,6 +8,8 @@ namespace PdbRewriter.Core
 {
     public static class PdbRewriterHelper
     {
+        public static ILogger Logger;
+
         private const string nugetLib = "lib";
         private const string nugetSrc = "src";
 

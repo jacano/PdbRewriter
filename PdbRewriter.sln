@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26206.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PdbRewriter.Console", "PdbRewriter.Console\PdbRewriter.Console.csproj", "{2061652D-025E-40E2-A6CE-080B60E3CF37}"
 EndProject
@@ -12,6 +12,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PdbRewriter.Core", "PdbRewriter.Core\PdbRewriter.Core.csproj", "{9615FC42-AB6B-4B5B-AE74-EE985D5081B6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PdbRewriter.Test", "PdbRewriter.Test\PdbRewriter.Test.csproj", "{D8E2E5A2-89CF-4F82-9F75-1A1DDCA3A4FF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PdbRewriter.Task", "PdbRewriter.Task\PdbRewriter.Task.csproj", "{CAF0AA34-ECDA-4045-A85C-9EE810E67910}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -105,6 +107,22 @@ Global
 		{D8E2E5A2-89CF-4F82-9F75-1A1DDCA3A4FF}.pcl_Release|Any CPU.Build.0 = Release|Any CPU
 		{D8E2E5A2-89CF-4F82-9F75-1A1DDCA3A4FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D8E2E5A2-89CF-4F82-9F75-1A1DDCA3A4FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CAF0AA34-ECDA-4045-A85C-9EE810E67910}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CAF0AA34-ECDA-4045-A85C-9EE810E67910}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CAF0AA34-ECDA-4045-A85C-9EE810E67910}.net_3_5_Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CAF0AA34-ECDA-4045-A85C-9EE810E67910}.net_3_5_Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CAF0AA34-ECDA-4045-A85C-9EE810E67910}.net_3_5_Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CAF0AA34-ECDA-4045-A85C-9EE810E67910}.net_3_5_Release|Any CPU.Build.0 = Release|Any CPU
+		{CAF0AA34-ECDA-4045-A85C-9EE810E67910}.net_4_0_Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CAF0AA34-ECDA-4045-A85C-9EE810E67910}.net_4_0_Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CAF0AA34-ECDA-4045-A85C-9EE810E67910}.net_4_0_Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CAF0AA34-ECDA-4045-A85C-9EE810E67910}.net_4_0_Release|Any CPU.Build.0 = Release|Any CPU
+		{CAF0AA34-ECDA-4045-A85C-9EE810E67910}.pcl_Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CAF0AA34-ECDA-4045-A85C-9EE810E67910}.pcl_Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CAF0AA34-ECDA-4045-A85C-9EE810E67910}.pcl_Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CAF0AA34-ECDA-4045-A85C-9EE810E67910}.pcl_Release|Any CPU.Build.0 = Release|Any CPU
+		{CAF0AA34-ECDA-4045-A85C-9EE810E67910}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CAF0AA34-ECDA-4045-A85C-9EE810E67910}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
