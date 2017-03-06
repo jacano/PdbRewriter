@@ -8,11 +8,9 @@ namespace ConsoleApplication7
     {
         static void Main(string[] args)
         {
-            var srcPath = @"D:\dev\PdbRewriter\ConsoleApplication8\GoogleAnalyticsTracker.Core.4.2.7\src";
+            var t = @"D:\dev\PdbRewriter\ConsoleApplication8\GoogleAnalyticsTracker.Core.4.2.7\lib\portable45\GoogleAnalyticsTracker.Core.dll";
 
-            var fileInput = @"D:\dev\PdbRewriter\ConsoleApplication8\GoogleAnalyticsTracker.Core.4.2.7\lib\portable45\GoogleAnalyticsTracker.Core.dll";
-
-            PdbHelper.RewritePdb(fileInput, srcPath);
+            PdbRewriterHelper.TryRewrite(t);
         }
     }
 }
