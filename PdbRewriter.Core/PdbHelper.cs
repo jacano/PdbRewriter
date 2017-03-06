@@ -12,10 +12,10 @@ namespace PdbRewriter.Core
     {
         public static void RewritePdb(string dllPath, string srcPath)
         {
-            var currentGuid = string.Empty;
+            var currentGuid = Guid.Empty;
             Action<Guid> guidAction = (u) =>
             {
-                currentGuid = u.ToString("N").ToUpperInvariant();
+                currentGuid = u;
             };
 
             var loweredFilesInSrc = Directory.GetFiles(srcPath, "*.*", SearchOption.AllDirectories).Select(p => p.ToLowerInvariant()).ToList();
@@ -40,7 +40,12 @@ namespace PdbRewriter.Core
                 }
             };
 
+            var filename = Path.GetFileName(dllPath);
             var pdbPath = Path.ChangeExtension(dllPath, "pdb");
+
+            var tmpPath = Path.GetTempPath();
+
+            var dllOutputPath = Path.Combine(tmpPath, filename);
 
             using (var fileStream = new FileStream(dllPath, FileMode.Open))
             {
@@ -56,15 +61,7 @@ namespace PdbRewriter.Core
                         }
                     ))
                     {
-
-                        var pdbBackupPath = Path.ChangeExtension(dllPath, "pdb.bak");
-                        File.Copy(pdbPath, pdbBackupPath, true);
-
-                        File.Delete(pdbPath);
-
-
-
-                        assembly.Write(dllPath, new WriterParameters()
+                        assembly.Write(dllOutputPath, new WriterParameters()
                         {
                             SymbolWriterProvider = new PdbWriterProvider(),
                             WriteSymbols = true,
@@ -74,7 +71,15 @@ namespace PdbRewriter.Core
                 }
             }
 
-            CopyPdbToSymbolCache(pdbPath, currentGuid);
+            var pdbBackupPath = Path.ChangeExtension(pdbPath, "pdb.bak");
+            File.Move(pdbPath, pdbBackupPath);
+
+            var pdbOutputPath = Path.ChangeExtension(dllOutputPath, "pdb");
+            File.Move(pdbOutputPath, pdbPath);
+
+            var guidString = currentGuid.ToString("N").ToLowerInvariant();
+
+            CopyPdbToSymbolCache(pdbPath, guidString);
         }
 
         static void CopyPdbToSymbolCache(string pdbPath, string currentGuid)
