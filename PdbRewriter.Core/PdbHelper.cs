@@ -1,5 +1,4 @@
-﻿using Microsoft.Win32;
-using Mono.Cecil;
+﻿using Mono.Cecil;
 using Mono.Cecil.Pdb;
 using System;
 using System.Collections.Generic;
@@ -84,12 +83,12 @@ namespace PdbRewriter.Core
             var pdbOutputPath = Path.ChangeExtension(dllOutputPath, "pdb");
             File.Move(pdbOutputPath, pdbPath);
 
-            ReplaceGuid(pdbPath, oldGuid, newGuid);
+            ReplaceGuidInPdb(pdbPath, oldGuid, newGuid);
 
             CopyPdbToSymbolCache(pdbPath, newGuid);
         }
 
-        static unsafe void ReplaceGuid(string pdbPath, Guid oldGuid, Guid newGuid)
+        static unsafe void ReplaceGuidInPdb(string pdbPath, Guid oldGuid, Guid newGuid)
         {
             var oldGuidBytes = oldGuid.ToByteArray();
             var oldGuidBytesLength = oldGuidBytes.LongLength;
@@ -109,15 +108,14 @@ namespace PdbRewriter.Core
                         var offset = 0L;
                         do
                         {
-                            guidIndex = IndexOf(offset, bytesPointer, byteLenght, newGuidPointer, newGuidBytesLength);
+                            guidIndex = UnsafeHelper.IndexOf(offset, bytesPointer, byteLenght, newGuidPointer, newGuidBytesLength);
                             if (guidIndex != -1)
                             {
-                                Override(guidIndex, bytesPointer, oldGuidPointer, oldGuidBytesLength);
+                                UnsafeHelper.Override(guidIndex, bytesPointer, oldGuidPointer, oldGuidBytesLength);
                                 offset += guidIndex;
                             }
                         }
                         while (guidIndex != -1);
-
                     }
                 }
             }
@@ -129,7 +127,7 @@ namespace PdbRewriter.Core
         {
             var guidString = currentGuid.ToString("N").ToLowerInvariant();
 
-            var symbolCacheDir = GetSymbolCacheDir();
+            var symbolCacheDir = SymbolHelper.GetSymbolCacheDir();
             if(!string.IsNullOrEmpty(symbolCacheDir))
             {
                 var pdbFilename = Path.GetFileName(pdbPath);
@@ -148,26 +146,6 @@ namespace PdbRewriter.Core
                 var finalPdbPath = Path.Combine(pdbFolderGuid, pdbFilename);
                 File.Copy(pdbPath, finalPdbPath, true);
             }
-        }
-
-        static string GetSymbolCacheDir()
-        {
-            var version = "14.0";
-            using (var key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\VisualStudio\" + version + @"\Debugger"))
-            {
-                if (key != null)
-                {
-                    var o = key.GetValue("SymbolCacheDir");
-                    if (o != null)
-                    {
-                        var symbolCacheDir = o as string;
-
-                        return symbolCacheDir;
-                    }
-                }
-            }
-
-            return string.Empty;
         }
 
         static int Process(List<string> srcFiles, string pdbFile)
@@ -199,41 +177,6 @@ namespace PdbRewriter.Core
             }
 
             return bestIndex;
-        }
-
-        static unsafe long IndexOf(long startOffset, byte* haystack, long haystackLength, byte* needle, long needleLength)
-        {
-            var hNext = haystack + startOffset;
-            var hEnd = haystack + haystackLength + 1 - needleLength;
-            var nEnd = needle + needleLength;
-
-            for (; hNext < hEnd; hNext++)
-            {
-                var hInc = hNext;
-                var nInc = needle;
-                for (; *nInc == *hInc; hInc++)
-                {
-                    if (++nInc == nEnd)
-                    {
-                        return hNext - haystack;
-                    }
-                }
-            }
-
-            return -1;
-        }
-
-        private static unsafe void Override(long startOffset, byte* bytesPointer, byte* rewrittenBytes, long rewrittenBytesLength)
-        {
-            var rInc = rewrittenBytes;
-            var bInc = bytesPointer + startOffset;
-
-            var rEnd = bInc + rewrittenBytesLength;
-
-            for (; bInc < rEnd; bInc++, rInc++)
-            {
-                *bInc = *rInc;
-            }
         }
     }
 }

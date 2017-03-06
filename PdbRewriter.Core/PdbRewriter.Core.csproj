@@ -46,6 +46,8 @@
   <ItemGroup>
     <Compile Include="PdbHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SymbolHelper.cs" />
+    <Compile Include="UnsafeHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\cecil\Mono.Cecil.csproj">
