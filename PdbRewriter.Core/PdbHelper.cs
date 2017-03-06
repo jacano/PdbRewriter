@@ -12,10 +12,16 @@ namespace PdbRewriter.Core
     {
         public static void RewritePdb(string dllPath, string srcPath)
         {
-            var currentGuid = Guid.Empty;
-            Action<Guid> guidAction = (u) =>
+            var oldGuid = Guid.Empty;
+            Action<Guid> oldGuidAction = (u) =>
             {
-                currentGuid = u;
+                oldGuid = u;
+            };
+
+            var newGuid = Guid.Empty;
+            Action<Guid> newGuidAction = (u) =>
+            {
+                newGuid = u;
             };
 
             var loweredFilesInSrc = Directory.GetFiles(srcPath, "*.*", SearchOption.AllDirectories).Select(p => p.ToLowerInvariant()).ToList();
@@ -57,7 +63,7 @@ namespace PdbRewriter.Core
                             SymbolReaderProvider = new PdbReaderProvider(),
                             SymbolStream = pdbStream,
                             ReadSymbols = true,
-                            GuidProvider = guidAction,
+                            GuidProvider = oldGuidAction,
                         }
                     ))
                     {
@@ -66,6 +72,7 @@ namespace PdbRewriter.Core
                             SymbolWriterProvider = new PdbWriterProvider(),
                             WriteSymbols = true,
                             SourcePathRewriter = rewrite,
+                            GuidProvider = newGuidAction,
                         });
                     }
                 }
@@ -77,13 +84,51 @@ namespace PdbRewriter.Core
             var pdbOutputPath = Path.ChangeExtension(dllOutputPath, "pdb");
             File.Move(pdbOutputPath, pdbPath);
 
-            var guidString = currentGuid.ToString("N").ToLowerInvariant();
+            ReplaceGuid(pdbPath, oldGuid, newGuid);
 
-            CopyPdbToSymbolCache(pdbPath, guidString);
+            CopyPdbToSymbolCache(pdbPath, newGuid);
         }
 
-        static void CopyPdbToSymbolCache(string pdbPath, string currentGuid)
+        static unsafe void ReplaceGuid(string pdbPath, Guid oldGuid, Guid newGuid)
         {
+            var oldGuidBytes = oldGuid.ToByteArray();
+            var oldGuidBytesLength = oldGuidBytes.LongLength;
+
+            var newGuidBytes = newGuid.ToByteArray();
+            var newGuidBytesLength = newGuidBytes.LongLength;
+
+            var bytes = File.ReadAllBytes(pdbPath);
+            var byteLenght = bytes.LongLength;
+            fixed (byte* bytesPointer = bytes)
+            {
+                fixed (byte* newGuidPointer = newGuidBytes)
+                {
+                    fixed (byte* oldGuidPointer = oldGuidBytes)
+                    {
+                        var guidIndex = -1L;
+                        var offset = 0L;
+                        do
+                        {
+                            guidIndex = IndexOf(offset, bytesPointer, byteLenght, newGuidPointer, newGuidBytesLength);
+                            if (guidIndex != -1)
+                            {
+                                Override(guidIndex, bytesPointer, oldGuidPointer, oldGuidBytesLength);
+                                offset += guidIndex;
+                            }
+                        }
+                        while (guidIndex != -1);
+
+                    }
+                }
+            }
+
+            File.WriteAllBytes(pdbPath, bytes);
+        }
+
+        static void CopyPdbToSymbolCache(string pdbPath, Guid currentGuid)
+        {
+            var guidString = currentGuid.ToString("N").ToLowerInvariant();
+
             var symbolCacheDir = GetSymbolCacheDir();
             if(!string.IsNullOrEmpty(symbolCacheDir))
             {
@@ -94,7 +139,7 @@ namespace PdbRewriter.Core
                     Directory.CreateDirectory(pdbFolder);
                 }
 
-                var pdbFolderGuid = Path.Combine(pdbFolder, currentGuid);
+                var pdbFolderGuid = Path.Combine(pdbFolder, guidString);
                 if (!Directory.Exists(pdbFolderGuid))
                 {
                     Directory.CreateDirectory(pdbFolderGuid);
@@ -105,7 +150,7 @@ namespace PdbRewriter.Core
             }
         }
 
-        private static string GetSymbolCacheDir()
+        static string GetSymbolCacheDir()
         {
             var version = "14.0";
             using (var key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\VisualStudio\" + version + @"\Debugger"))
@@ -154,6 +199,41 @@ namespace PdbRewriter.Core
             }
 
             return bestIndex;
+        }
+
+        static unsafe long IndexOf(long startOffset, byte* haystack, long haystackLength, byte* needle, long needleLength)
+        {
+            var hNext = haystack + startOffset;
+            var hEnd = haystack + haystackLength + 1 - needleLength;
+            var nEnd = needle + needleLength;
+
+            for (; hNext < hEnd; hNext++)
+            {
+                var hInc = hNext;
+                var nInc = needle;
+                for (; *nInc == *hInc; hInc++)
+                {
+                    if (++nInc == nEnd)
+                    {
+                        return hNext - haystack;
+                    }
+                }
+            }
+
+            return -1;
+        }
+
+        private static unsafe void Override(long startOffset, byte* bytesPointer, byte* rewrittenBytes, long rewrittenBytesLength)
+        {
+            var rInc = rewrittenBytes;
+            var bInc = bytesPointer + startOffset;
+
+            var rEnd = bInc + rewrittenBytesLength;
+
+            for (; bInc < rEnd; bInc++, rInc++)
+            {
+                *bInc = *rInc;
+            }
         }
     }
 }
