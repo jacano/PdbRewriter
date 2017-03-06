@@ -1,4 +1,5 @@
 ﻿using Mono.Cecil;
+using Mono.Cecil.Mono.Cecil;
 using Mono.Cecil.Pdb;
 using System;
 using System.Collections.Generic;
@@ -11,16 +12,16 @@ namespace PdbRewriter.Core
     {
         public static void RewritePdb(string dllPath, string srcPath)
         {
-            var oldGuid = Guid.Empty;
-            Action<Guid> oldGuidAction = (u) =>
+            var oldSignature = default(Signature);
+            Action<Signature> oldSigAction = (u) =>
             {
-                oldGuid = u;
+                oldSignature = u;
             };
 
-            var newGuid = Guid.Empty;
-            Action<Guid> newGuidAction = (u) =>
+            var newSignature = default(Signature);
+            Action<Signature> newSigAction = (u) =>
             {
-                newGuid = u;
+                newSignature = u;
             };
 
             var loweredFilesInSrc = Directory.GetFiles(srcPath, "*.*", SearchOption.AllDirectories).Select(p => p.ToLowerInvariant()).ToList();
@@ -62,7 +63,7 @@ namespace PdbRewriter.Core
                             SymbolReaderProvider = new PdbReaderProvider(),
                             SymbolStream = pdbStream,
                             ReadSymbols = true,
-                            GuidProvider = oldGuidAction,
+                            SignatureProvider = oldSigAction,
                         }
                     ))
                     {
@@ -71,7 +72,7 @@ namespace PdbRewriter.Core
                             SymbolWriterProvider = new PdbWriterProvider(),
                             WriteSymbols = true,
                             SourcePathRewriter = rewrite,
-                            GuidProvider = newGuidAction,
+                            SignatureProvider = newSigAction,
                         });
                     }
                 }
@@ -83,39 +84,46 @@ namespace PdbRewriter.Core
             var pdbOutputPath = Path.ChangeExtension(dllOutputPath, "pdb");
             File.Move(pdbOutputPath, pdbPath);
 
-            ReplaceGuidInPdb(pdbPath, oldGuid, newGuid);
+            ReplaceSignatureInPdb(pdbPath, oldSignature, newSignature);
 
-            CopyPdbToSymbolCache(pdbPath, newGuid);
+            CopyPdbToSymbolCache(pdbPath, oldSignature);
         }
 
-        static unsafe void ReplaceGuidInPdb(string pdbPath, Guid oldGuid, Guid newGuid)
+        static unsafe void ReplaceSignatureInPdb(string pdbPath, Signature oldSignature, Signature newSignature)
         {
-            var oldGuidBytes = oldGuid.ToByteArray();
-            var oldGuidBytesLength = oldGuidBytes.LongLength;
+            var oldGuidBytes = oldSignature.Guid.ToByteArray();
+            var oldGuidLength = oldGuidBytes.LongLength;
+            //var oldAgeBytes = BitConverter.GetBytes(oldSignature.Age);
+            //var oldSignatureBytes = ArrayHelper.Concat(oldGuidBytes, oldAgeBytes);
+            //var oldSignatureBytesLength = oldSignatureBytes.LongLength;
 
-            var newGuidBytes = newGuid.ToByteArray();
-            var newGuidBytesLength = newGuidBytes.LongLength;
+            var newGuidBytes = newSignature.Guid.ToByteArray();
+            var newGuidLength = newGuidBytes.LongLength;
+            //var newAgeBytes = BitConverter.GetBytes(newSignature.Age);
+            //var newSignatureBytes = ArrayHelper.Concat(newGuidBytes, newAgeBytes);
+            //var newSignatureBytesLength = newSignatureBytes.LongLength;
 
             var bytes = File.ReadAllBytes(pdbPath);
             var byteLenght = bytes.LongLength;
+
             fixed (byte* bytesPointer = bytes)
             {
-                fixed (byte* newGuidPointer = newGuidBytes)
+                fixed (byte* newSigPointer = newGuidBytes)
                 {
-                    fixed (byte* oldGuidPointer = oldGuidBytes)
+                    fixed (byte* oldSignPointer = oldGuidBytes)
                     {
-                        var guidIndex = -1L;
+                        var signatureIndex = -1L;
                         var offset = 0L;
                         do
                         {
-                            guidIndex = UnsafeHelper.IndexOf(offset, bytesPointer, byteLenght, newGuidPointer, newGuidBytesLength);
-                            if (guidIndex != -1)
+                            signatureIndex = UnsafeHelper.IndexOf(offset, bytesPointer, byteLenght, newSigPointer, newGuidLength);
+                            if (signatureIndex != -1)
                             {
-                                UnsafeHelper.Override(guidIndex, bytesPointer, oldGuidPointer, oldGuidBytesLength);
-                                offset += guidIndex;
+                                UnsafeHelper.Override(signatureIndex, bytesPointer, oldSignPointer, oldGuidLength);
+                                offset += signatureIndex;
                             }
                         }
-                        while (guidIndex != -1);
+                        while (signatureIndex != -1);
                     }
                 }
             }
@@ -123,9 +131,10 @@ namespace PdbRewriter.Core
             File.WriteAllBytes(pdbPath, bytes);
         }
 
-        static void CopyPdbToSymbolCache(string pdbPath, Guid currentGuid)
+        static void CopyPdbToSymbolCache(string pdbPath, Signature oldSignature)
         {
-            var guidString = currentGuid.ToString("N").ToLowerInvariant();
+            var ageString = oldSignature.Age.ToString("X");
+            var guidString = oldSignature.Guid.ToString("N").ToUpperInvariant();
 
             var symbolCacheDir = SymbolHelper.GetSymbolCacheDir();
             if(!string.IsNullOrEmpty(symbolCacheDir))
@@ -137,13 +146,13 @@ namespace PdbRewriter.Core
                     Directory.CreateDirectory(pdbFolder);
                 }
 
-                var pdbFolderGuid = Path.Combine(pdbFolder, guidString);
-                if (!Directory.Exists(pdbFolderGuid))
+                var pdbFolderSignature = Path.Combine(pdbFolder, guidString + ageString);
+                if (!Directory.Exists(pdbFolderSignature))
                 {
-                    Directory.CreateDirectory(pdbFolderGuid);
+                    Directory.CreateDirectory(pdbFolderSignature);
                 }
 
-                var finalPdbPath = Path.Combine(pdbFolderGuid, pdbFilename);
+                var finalPdbPath = Path.Combine(pdbFolderSignature, pdbFilename);
                 File.Copy(pdbPath, finalPdbPath, true);
             }
         }

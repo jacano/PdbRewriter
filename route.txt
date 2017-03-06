@@ -1,4 +1,4 @@
-Crear PdbRewritter nuget (development dependency) (Un target + dll de targets para depuracion en VS + dll con codigo del core)
+﻿Crear PdbRewritter nuget (development dependency) (Un target + dll de targets para depuracion en VS + dll con codigo del core)
 	-target hookeado al BeforeTargets de ResolveAssemblyReferences
 	-Busco todos los paquetes nuget
 	-Saco la ruta inicial del nuget
@@ -69,3 +69,26 @@ AfterTargets
 _CopyFilesMarkedCopyLocal
 
 FileWritesShareable
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Mejoras:
+
+Usar roslyn
+Gestion del Age en pdb reescrito
