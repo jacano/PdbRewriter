@@ -11,9 +11,15 @@ namespace PdbRewriter
         {
             PdbRewriterHelper.Logger = new TaskLogger(this);
         }
+		
+		public ITaskItem[] Files { get; set; }
 
         public override bool Execute()
-        { 
+        {
+            foreach (var item in Files)
+            {
+                PdbRewriterHelper.Logger.Log(item.ToString());
+            }
             return true;
         }
     }

@@ -1,0 +1,4 @@
+https://github.com/KirillOsenkov/MSBuildStructuredLog/wiki/ResolveAssemblyReference
+
+
+http://source.roslyn.io/#MSBuildFiles/C/ProgramFiles(x86)/MSBuild/14.0/bin_/amd64/Microsoft.Common.CurrentVersion.targets,1820
