@@ -4,4 +4,5 @@ obj/
 packages/
 
 *.user
+*.lock.json
 Output-Build.txt
