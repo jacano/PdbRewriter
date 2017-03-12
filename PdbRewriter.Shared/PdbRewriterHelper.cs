@@ -15,6 +15,8 @@ namespace PdbRewriter.Core
 
         public static void TryRewrite(string dllPath)
         {
+            Logger.Log($"Trying to rewrite: {dllPath}");
+
             var path = dllPath;
 
             var indexOfDirSep = -1;

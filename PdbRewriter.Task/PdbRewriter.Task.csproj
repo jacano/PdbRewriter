@@ -12,6 +12,8 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -45,12 +47,6 @@
     <Compile Include="PdbRewriterTask.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TaskLogger.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\PdbRewriter.Core\PdbRewriter.Core.csproj">
-      <Project>{9615fc42-ab6b-4b5b-ae74-ee985d5081b6}</Project>
-      <Name>PdbRewriter.Core</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

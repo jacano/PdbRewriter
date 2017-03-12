@@ -68,12 +68,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PdbRewriter.Core\PdbRewriter.Core.csproj">
-      <Project>{9615fc42-ab6b-4b5b-ae74-ee985d5081b6}</Project>
-      <Name>PdbRewriter.Core</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

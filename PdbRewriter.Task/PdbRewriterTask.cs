@@ -16,10 +16,16 @@ namespace PdbRewriter
 
         public override bool Execute()
         {
-            foreach (var item in Files)
+            if (this.Files != null)
             {
-                PdbRewriterHelper.Logger.Log(item.ToString());
+                foreach (var item in Files)
+                {
+                    var dllPath = item.ToString();
+                    PdbRewriterHelper.TryRewrite(dllPath);
+                }
+
             }
+
             return true;
         }
     }
