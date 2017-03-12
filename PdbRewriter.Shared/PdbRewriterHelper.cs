@@ -23,17 +23,21 @@ namespace PdbRewriter.Core
             do
             {
                 path = path.TrimEnd(Path.DirectorySeparatorChar);
-
                 indexOfDirSep = path.LastIndexOf(Path.DirectorySeparatorChar);
 
+                if(indexOfDirSep == -1)
+                {
+                    break;
+                }
+
                 var folderName = path.Substring(indexOfDirSep + 1);
-
-                path = path.Substring(0, indexOfDirSep);
-
                 if(folderName == nugetLib)
                 {
                     break;
                 }
+
+                path = path.Substring(0, indexOfDirSep);
+
             }
             while (indexOfDirSep != -1);
 
