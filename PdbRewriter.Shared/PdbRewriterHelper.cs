@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.IO;
 
 namespace PdbRewriter.Core
 {
@@ -17,37 +13,45 @@ namespace PdbRewriter.Core
         {
             Logger.Log($"Trying to rewrite: {dllPath}");
 
+            var found = TryFindSrcDirInDllPath(dllPath, out var srcPath);
+            if (found)
+            {
+                var srcDirExists = Directory.Exists(srcPath);
+                if (srcDirExists)
+                {
+                    Logger.Log($"Nuget reference with symbols found at: {srcPath}");
+                    PdbHelper.RewritePdb(dllPath, srcPath);
+                }
+            }
+        }
+
+        private static bool TryFindSrcDirInDllPath(string dllPath, out string srcPath)
+        {
+            var found = false;
+
             var path = dllPath;
 
-            var indexOfDirSep = -1;
-            do
+            while (!found)
             {
                 path = path.TrimEnd(Path.DirectorySeparatorChar);
-                indexOfDirSep = path.LastIndexOf(Path.DirectorySeparatorChar);
-
-                if(indexOfDirSep == -1)
+                var indexOfDirSep = path.LastIndexOf(Path.DirectorySeparatorChar);
+                if (indexOfDirSep == -1)
                 {
                     break;
                 }
 
                 var folderName = path.Substring(indexOfDirSep + 1);
-                if(folderName == nugetLib)
+                if (folderName == nugetLib)
                 {
-                    break;
+                    found = true;
                 }
 
                 path = path.Substring(0, indexOfDirSep);
-
             }
-            while (indexOfDirSep != -1);
 
-            var srcPath = Path.Combine(path, nugetSrc);
+            srcPath = Path.Combine(path, nugetSrc);
 
-            var srcDirExists = Directory.Exists(srcPath);
-            if (srcDirExists)
-            {
-                PdbHelper.RewritePdb(dllPath, srcPath);
-            }
+            return found;
         }
     }
 }

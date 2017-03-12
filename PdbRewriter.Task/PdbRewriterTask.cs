@@ -1,5 +1,4 @@
 ﻿using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using PdbRewriter.Core;
 using PdbRewriter.Task;
 
@@ -23,7 +22,6 @@ namespace PdbRewriter
                     var dllPath = item.ToString();
                     PdbRewriterHelper.TryRewrite(dllPath);
                 }
-
             }
 
             return true;

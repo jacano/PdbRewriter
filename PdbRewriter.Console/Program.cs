@@ -11,10 +11,10 @@ namespace ConsoleApplication7
         {
             PdbRewriterHelper.Logger = new ConsoleLogger();
 
-            var t2 = @"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6\Microsoft.CSharp.dll";
-            var t = @"E:\dev\PdbRewriter\ConsoleApplication8\GoogleAnalyticsTracker.Core.4.2.7\lib\portable45\GoogleAnalyticsTracker.Core.dll";
+            //var t2 = @"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6\Microsoft.CSharp.dll";
+            var t1 = @"E:\dev\PdbRewriter\ConsoleApplication8\GoogleAnalyticsTracker.Core.4.2.7\lib\portable45\GoogleAnalyticsTracker.Core.dll";
 
-            PdbRewriterHelper.TryRewrite(t2);
+            PdbRewriterHelper.TryRewrite(t1);
         }
     }
 }
