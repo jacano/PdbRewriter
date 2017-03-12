@@ -12,6 +12,21 @@ namespace PdbRewriter.Core
     {
         public static void RewritePdb(string dllPath, string srcPath)
         {
+            var pdbPath = Path.ChangeExtension(dllPath, "pdb");
+            var pdbBackupPath = Path.ChangeExtension(pdbPath, "pdb.bak");
+
+            var alreadyRewritten = File.Exists(pdbBackupPath);
+            if (alreadyRewritten)
+            {
+                return;
+            }
+
+            var filename = Path.GetFileName(dllPath);
+            var tmpPath = Path.GetTempPath();
+
+            var dllOutputPath = Path.Combine(tmpPath, filename);
+            var pdbOutputPath = Path.ChangeExtension(dllOutputPath, "pdb");
+
             var oldSignature = default(Signature);
             Action<Signature> oldSigAction = (u) =>
             {
@@ -46,13 +61,6 @@ namespace PdbRewriter.Core
                 }
             };
 
-            var filename = Path.GetFileName(dllPath);
-            var pdbPath = Path.ChangeExtension(dllPath, "pdb");
-
-            var tmpPath = Path.GetTempPath();
-
-            var dllOutputPath = Path.Combine(tmpPath, filename);
-
             using (var fileStream = new FileStream(dllPath, FileMode.Open))
             {
                 using (var pdbStream = new FileStream(pdbPath, FileMode.Open))
@@ -78,10 +86,7 @@ namespace PdbRewriter.Core
                 }
             }
 
-            var pdbBackupPath = Path.ChangeExtension(pdbPath, "pdb.bak");
             File.Move(pdbPath, pdbBackupPath);
-
-            var pdbOutputPath = Path.ChangeExtension(dllOutputPath, "pdb");
             File.Move(pdbOutputPath, pdbPath);
 
             ReplaceSignatureInPdb(pdbPath, oldSignature, newSignature);

@@ -20,6 +20,7 @@ namespace PdbRewriter.Core
                 if (srcDirExists)
                 {
                     Logger.Log($"Nuget reference with symbols found at: {srcPath}");
+
                     PdbHelper.RewritePdb(dllPath, srcPath);
                 }
             }
