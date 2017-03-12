@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <metadata>
+        <id>PdbRewriter</id>
+        <version>1.0.0</version>
+        <authors>jacano</authors>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <developmentDependency>true</developmentDependency>
+        <description>PdbRewriter</description>
+    </metadata>
+    <files>
+        <file src="PdbRewriter.targets" target="build\PdbRewriter.targets" />
+        <file src="..\PdbRewriter.Task\bin\Release\PdbRewriter.Task.dll" target="build\PdbRewriter.Task.dll" />
+    </files>
+</package>
