@@ -146,7 +146,7 @@ namespace PdbRewriter.Core
             var ageString = oldSignature.Age.ToString("X");
             var guidString = oldSignature.Guid.ToString("N").ToUpperInvariant();
 
-            var symbolCacheDir = SymbolHelper.GetSymbolCacheDir();
+            var symbolCacheDir = SymbolHelper.GetFirstSymbolCacheDir();
             if(!string.IsNullOrEmpty(symbolCacheDir))
             {
                 var pdbFilename = Path.GetFileName(pdbPath);
