@@ -11,8 +11,6 @@ namespace PdbRewriter.Core
 
         public static void TryRewrite(string dllPath)
         {
-            Logger.Log($"Trying to rewrite: {dllPath}");
-
             var found = TryFindSrcDirInDllPath(dllPath, out var srcPath);
             if (found)
             {

@@ -18,6 +18,8 @@ namespace PdbRewriter.Core
             var alreadyRewritten = File.Exists(pdbBackupPath);
             if (alreadyRewritten)
             {
+                PdbRewriterHelper.Logger.Log($"{pdbPath} already rewritten");
+
                 return;
             }
 
@@ -87,7 +89,10 @@ namespace PdbRewriter.Core
             }
 
             File.Move(pdbPath, pdbBackupPath);
+            PdbRewriterHelper.Logger.Log($"{pdbPath} rewritten");
+
             File.Move(pdbOutputPath, pdbPath);
+            PdbRewriterHelper.Logger.Log($"{pdbBackupPath} backup created");
 
             ReplaceSignatureInPdb(pdbPath, oldSignature, newSignature);
 
@@ -159,6 +164,7 @@ namespace PdbRewriter.Core
 
                 var finalPdbPath = Path.Combine(pdbFolderSignature, pdbFilename);
                 File.Copy(pdbPath, finalPdbPath, true);
+                PdbRewriterHelper.Logger.Log($"{pdbPath} copied to VS Symbol cache: {symbolCacheDir}");
             }
         }
 
