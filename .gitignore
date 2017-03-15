@@ -5,4 +5,6 @@ packages/
 
 *.user
 *.lock.json
+*.nuget.props
+*.nuget.targets
 Output-Build.txt

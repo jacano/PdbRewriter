@@ -1,26 +1,35 @@
-﻿using Microsoft.Win32;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System;
+using System.IO;
+using System.Xml.Linq;
+using System.Xml.XPath;
 
 namespace PdbRewriter.Core
 {
     public static class SymbolHelper
     {
-        public static string GetSymbolCacheDir()
-        {
-            var version = "14.0";
-            using (var key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\VisualStudio\" + version + @"\Debugger"))
-            {
-                if (key != null)
-                {
-                    var o = key.GetValue("SymbolCacheDir");
-                    if (o != null)
-                    {
-                        var symbolCacheDir = o as string;
+        private static string[] vsVersions = new[] { "2017", "2015" };
 
-                        return symbolCacheDir;
+        public static string GetFirstSymbolCacheDir()
+        {
+            var myDocuments = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+            foreach (var vsVersion in vsVersions)
+            {
+                var vsSettings = $@"{myDocuments}\Visual Studio {vsVersion}\Settings\CurrentSettings.vssettings";
+                if (File.Exists(vsSettings))
+                {
+                    var vsSettingContent = File.ReadAllText(vsSettings);
+
+                    var symbolDirName = "SymbolCacheDir";
+                    var xpath = $"//UserSettings/Category[@name='Debugger']/PropertyValue[@name='{symbolDirName}']";
+
+                    var doc = XDocument.Parse(vsSettingContent);
+                    var node = doc.XPathSelectElement(xpath);
+                    if (node != null)
+                    {
+                        var symbolDirPath = node.FirstNode.ToString();
+
+                        return symbolDirPath;
                     }
                 }
             }
